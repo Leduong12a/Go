@@ -54,10 +54,14 @@ const MainLayout: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" width={240} className="shadow-lg">
         <div className={`h-16 flex items-center px-6 bg-[#002140] transition-all duration-300 ${collapsed ? 'justify-center px-0' : ''}`}>
-          <div className={`h-8 w-8 bg-ant-primary rounded flex items-center justify-center text-white font-bold text-xl ${collapsed ? '' : 'mr-3'}`}>
-            A
+          <div className=" flex-shrink-0 h-10 w-10 flex items-center justify-center overflow-hidden mr-2 flex-shrink-0 h-10 w-10 flex items-center justify-center overflow-hidden mr-2 bg-white p-1 rounded-lg shadow-sm">
+            <img
+              src={"../src/img/logo.png"}
+              alt="Hobiwood Logo"
+              className="w-full h-auto object-contain"
+            />
           </div>
-          {!collapsed && <span className="font-bold text-lg text-ant-primary tracking-wider">ANT OPS CENTER</span>}
+          {!collapsed && <span className="font-bold text-lg text-ant-primary tracking-wider"> Anh Tuyển</span>}
         </div>
         <Menu
           theme="dark"
@@ -67,11 +71,7 @@ const MainLayout: React.FC = () => {
           onClick={({ key }) => navigate(key)}
           className="border-none mt-4"
         />
-        {!collapsed && (
-          <div className="mt-auto p-6 text-[11px] opacity-50 text-white">
-            V 2.4.0 • Admin Tuyển
-          </div>
-        )}
+
       </Sider>
       <Layout className="main">
         <Header className="bg-white p-0 flex items-center justify-between shadow-sm px-6 z-10 h-16 border-b border-ant-border">
@@ -102,8 +102,8 @@ const MainLayout: React.FC = () => {
               <Space className="cursor-pointer hover:bg-gray-100 p-1 px-2 rounded-lg transition-colors">
                 <Avatar icon={<UserOutlined />} className="bg-ant-primary" />
                 <div className="hidden md:block">
-                  <div className="text-sm font-medium leading-none text-[rgba(0,0,0,0.88)]">Tuyển Admin</div>
-                  <div className="text-xs text-[rgba(0,0,0,0.45)]">Administrator</div>
+                  <div className="text-sm font-medium leading-none text-[rgba(0,0,0,0.88)]">Anh Tuyển</div>
+
                 </div>
               </Space>
             </Dropdown>
