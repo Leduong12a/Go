@@ -61,7 +61,7 @@ const MainLayout: React.FC = () => {
               className="w-full h-auto object-contain"
             />
           </div>
-          {!collapsed && <span className="font-bold text-lg text-ant-primary tracking-wider"> Anh Tuyển</span>}
+          {!collapsed && <span className="font-bold text-lg text-ant-primary tracking-wider"> HoBi Wood</span>}
         </div>
         <Menu
           theme="dark"
