@@ -13,6 +13,7 @@ import {
   SearchOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  CheckSquareOutlined,
 } from '@ant-design/icons';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
@@ -26,6 +27,7 @@ import CalendarView from './pages/CalendarView';
 import SmartView from './pages/SmartView';
 import AdminView from './pages/AdminView';
 import WorkReportDetail from './pages/WorkReportDetail';
+import TaskView from './pages/TaskView';
 
 const { Header, Sider, Content } = Layout;
 
@@ -35,14 +37,16 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
 
   const menuItems = [
-    { key: '/', icon: <DashboardOutlined />, label: 'Dashboard' },
-    { key: '/navigation', icon: <ClusterOutlined />, label: 'Cây thư mục' },
-    { key: '/reports', icon: <FileTextOutlined />, label: 'Danh sách báo cáo' },
-    { key: '/work-report-detail', icon: <FileTextOutlined />, label: 'Chi tiết báo cáo' },
-    { key: '/executive', icon: <ThunderboltOutlined />, label: 'Điều hành việc' },
-    { key: '/calendar', icon: <CalendarOutlined />, label: 'Lịch & Nhắc báo cáo' },
-    { key: '/smart-view', icon: <BarChartOutlined />, label: 'Tổng hợp chủ đề' },
-    { key: '/admin', icon: <SettingOutlined />, label: 'Quản trị hệ thống' },
+    { key: '/', icon: <DashboardOutlined />, label: 'Điều hành công việc' },
+
+    { key: '/navigation', icon: <ClusterOutlined />, label: 'Báo cáo định kỳ' },
+    { key: '/tasks', icon: <CheckSquareOutlined />, label: 'Công việc' },
+    // { key: '/reports', icon: <FileTextOutlined />, label: 'Danh sách báo cáo' },
+    // { key: '/work-report-detail', icon: <FileTextOutlined />, label: 'Chi tiết báo cáo' },
+    // { key: '/executive', icon: <ThunderboltOutlined />, label: 'Điều hành việc' },
+    // { key: '/calendar', icon: <CalendarOutlined />, label: 'Lịch & Nhắc báo cáo' },
+    // { key: '/smart-view', icon: <BarChartOutlined />, label: 'Tổng hợp chủ đề' },
+    // { key: '/admin', icon: <SettingOutlined />, label: 'Quản trị hệ thống' },
   ];
 
   const userMenuItems = [
@@ -80,12 +84,12 @@ const MainLayout: React.FC = () => {
               className: 'text-lg cursor-pointer hover:text-ant-primary transition-colors',
               onClick: () => setCollapsed(!collapsed),
             })}
-            <Input
+            {/* <Input
               placeholder="Tìm kiếm công việc, báo cáo..."
               prefix={<SearchOutlined className="text-gray-400" />}
               className="w-64 md:w-80 rounded-md bg-[#fafafa] border-ant-border"
               style={{ padding: '6px 12px' }}
-            />
+            /> */}
           </Space>
 
           <Space size="large">
@@ -120,6 +124,7 @@ const MainLayout: React.FC = () => {
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/smart-view" element={<SmartView />} />
             <Route path="/admin" element={<AdminView />} />
+            <Route path="/tasks" element={<TaskView />} />
             <Route path="/work-report-detail" element={<WorkReportDetail />} />
           </Routes>
         </Content>
