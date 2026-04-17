@@ -435,7 +435,13 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-2">Trạng thái</p>
-                  {renderStatus(selectedTask.status)}
+                  {selectedTask.isIssue ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-500 rounded-full text-xs font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span> Vướng Mắc
+                    </span>
+                  ) : (
+                    renderStatus(selectedTask.status)
+                  )}
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-2">Mức độ ảnh hưởng</p>
