@@ -84,41 +84,27 @@ const Dashboard: React.FC = () => {
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   
-  // --- STATE HIỆU ỨNG TẢI TRANG ---
-  const [loading, setLoading] = useState<boolean>(false);
-  const [debouncedFilters, setDebouncedFilters] = useState({ filterWeek, filterDept, filterPriority, filterStatus });
-
-  // Hiệu ứng Loading 300ms khi bộ lọc thay đổi
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setDebouncedFilters({ filterWeek, filterDept, filterPriority, filterStatus });
-      setLoading(false);
-    }, 400); // 400ms delay giả lập
-    return () => clearTimeout(timer);
-  }, [filterWeek, filterDept, filterPriority, filterStatus]);
-
   // --- LOGIC LỌC DỮ LIỆU ---
   const filteredTasks = useMemo(() => {
     return ALL_TASKS.filter(task => {
-      const matchWeek = debouncedFilters.filterWeek === 'all' || task.week === debouncedFilters.filterWeek;
-      const matchDept = debouncedFilters.filterDept === 'all' || task.department === debouncedFilters.filterDept;
+      const matchWeek = filterWeek === 'all' || task.week === filterWeek;
+      const matchDept = filterDept === 'all' || task.department === filterDept;
       
       let matchPriority = true;
-      if (debouncedFilters.filterPriority === 'high') matchPriority = task.impact >= 3;
-      if (debouncedFilters.filterPriority === 'low') matchPriority = task.impact <= 2;
+      if (filterPriority === 'high') matchPriority = task.impact >= 3;
+      if (filterPriority === 'low') matchPriority = task.impact <= 2;
 
       let matchStatus = true;
-      if (debouncedFilters.filterStatus === 'in_progress') matchStatus = task.status === 'Đang làm';
-      if (debouncedFilters.filterStatus === 'overdue') matchStatus = task.status === 'Quá hạn';
-      if (debouncedFilters.filterStatus === 'completed') matchStatus = task.status === 'Hoàn thành';
-      if (debouncedFilters.filterStatus === 'ext_1') matchStatus = task.status === 'Hoàn thành gia hạn 1';
-      if (debouncedFilters.filterStatus === 'ext_2') matchStatus = task.status === 'Hoàn thành gia hạn 2';
-      if (debouncedFilters.filterStatus === 'ext_3') matchStatus = task.status === 'Hoàn thành gia hạn 3';
+      if (filterStatus === 'in_progress') matchStatus = task.status === 'Đang làm';
+      if (filterStatus === 'overdue') matchStatus = task.status === 'Quá hạn';
+      if (filterStatus === 'completed') matchStatus = task.status === 'Hoàn thành';
+      if (filterStatus === 'ext_1') matchStatus = task.status === 'Hoàn thành gia hạn 1';
+      if (filterStatus === 'ext_2') matchStatus = task.status === 'Hoàn thành gia hạn 2';
+      if (filterStatus === 'ext_3') matchStatus = task.status === 'Hoàn thành gia hạn 3';
 
       return matchWeek && matchDept && matchPriority && matchStatus;
     });
-  }, [debouncedFilters]);
+  }, [filterWeek, filterDept, filterPriority, filterStatus]);
 
   // --- TÁCH MẢNG CON TỪ DANH SÁCH ĐÃ LỌC ---
   const displayStats = useMemo(() => {
@@ -323,10 +309,8 @@ const Dashboard: React.FC = () => {
         </Space>
       </div>
 
-      {/* OVERLAY LOADING MỎNG NẾU ĐANG FILTER */}
-      <Spin spinning={loading} size="large" tip="Đang tải dữ liệu...">
-        <div className={loading ? 'opacity-50 transition-opacity' : 'opacity-100 transition-opacity'}>
-          {/* --- KPI TỔNG QUAN --- */}
+      {/* --- KPI TỔNG QUAN --- */}
+      <div>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} lg={6}>
               <Card variant="borderless" className="shadow-sm hover:shadow-md transition-shadow h-full border border-gray-100">
@@ -356,7 +340,7 @@ const Dashboard: React.FC = () => {
               <Card title={<span className="text-red-600"><ClockCircleOutlined className="mr-2" />🔴 DANH SÁCH VIỆC QUÁ HẠN</span>} variant="borderless" className="shadow-sm border border-red-100">
                 {displayOverdue.length > 0 ? (
                   <Table
-                    dataSource={displayOverdue}
+                    dataSource={displayOverdue.slice(0, 30)}
                     columns={overdueColumns}
                     pagination={false}
                     scroll={{ y: 250 }}
@@ -372,7 +356,7 @@ const Dashboard: React.FC = () => {
               <Card title={<span className="text-orange-600"><FireOutlined className="mr-2" />⭐ VIỆC ẢNH HƯỞNG CAO ĐANG LÀM (MỨC 3-4)</span>} variant="borderless" className="shadow-sm border border-orange-100">
                 {displayImportant.length > 0 ? (
                   <Table
-                    dataSource={displayImportant}
+                    dataSource={displayImportant.slice(0, 30)}
                     columns={importantColumns}
                     pagination={false}
                     scroll={{ y: 250 }}
@@ -401,7 +385,7 @@ const Dashboard: React.FC = () => {
               >
                 {displayIssues.length > 0 ? (
                   <Timeline
-                    items={displayIssues.map(issue => ({
+                    items={displayIssues.slice(0, 30).map(issue => ({
                       color: issue.status === 'Quá hạn' ? 'red' : 'orange',
                       children: (
                         <div 
@@ -422,8 +406,7 @@ const Dashboard: React.FC = () => {
               </Card>
             </Col>
           </Row>
-        </div>
-      </Spin>
+      </div>
 
       {/* --- MODAL CHI TIẾT --- */}
       {selectedTask && (
