@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Input, Badge, Avatar, Dropdown, ConfigProvider, theme, Space, Breadcrumb } from 'antd';
+import { Layout, Badge, Avatar, Dropdown, Space, Drawer, Menu } from 'antd';
 import {
   DashboardOutlined,
   ClusterOutlined,
-  FileTextOutlined,
-  ThunderboltOutlined,
-  CalendarOutlined,
-  BarChartOutlined,
-  SettingOutlined,
+  CheckSquareOutlined,
   BellOutlined,
   UserOutlined,
-  SearchOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  MenuOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  CheckSquareOutlined,
 } from '@ant-design/icons';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import './MainLayout.css';
 
-// Pages (will be created next)
+// Pages
 import Dashboard from './pages/Dashboard';
 import NavigationHub from './pages/NavigationHub';
 import ReportList from './pages/ReportList';
@@ -29,24 +27,18 @@ import AdminView from './pages/AdminView';
 import WorkReportDetail from './pages/WorkReportDetail';
 import TaskView from './pages/TaskView';
 
-const { Header, Sider, Content } = Layout;
+const { Content, Header, Sider } = Layout;
 
 const MainLayout: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile Menu State
+  const [collapsed, setCollapsed] = useState(false); // Desktop Sider State
 
   const menuItems = [
-    { key: '/', icon: <DashboardOutlined />, label: 'Điều hành công việc' },
-
-    { key: '/navigation', icon: <ClusterOutlined />, label: 'Báo cáo định kỳ' },
-    { key: '/tasks', icon: <CheckSquareOutlined />, label: 'Công việc' },
-    // { key: '/reports', icon: <FileTextOutlined />, label: 'Danh sách báo cáo' },
-    // { key: '/work-report-detail', icon: <FileTextOutlined />, label: 'Chi tiết báo cáo' },
-    // { key: '/executive', icon: <ThunderboltOutlined />, label: 'Điều hành việc' },
-    // { key: '/calendar', icon: <CalendarOutlined />, label: 'Lịch & Nhắc báo cáo' },
-    // { key: '/smart-view', icon: <BarChartOutlined />, label: 'Tổng hợp chủ đề' },
-    // { key: '/admin', icon: <SettingOutlined />, label: 'Quản trị hệ thống' },
+    { key: '/', icon: <DashboardOutlined />, label: 'ĐIỀU HÀNH CÔNG VIỆC' },
+    { key: '/navigation', icon: <ClusterOutlined />, label: 'BÁO CÁO ĐỊNH KỲ' },
+    { key: '/tasks', icon: <CheckSquareOutlined />, label: 'CÔNG VIỆC' },
   ];
 
   const userMenuItems = [
@@ -55,17 +47,27 @@ const MainLayout: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" width={240} className="shadow-lg">
+    <Layout style={{ minHeight: '100vh', display: 'flex', flexDirection: 'row' }}>
+      
+      {/* --- DESKTOP SIDER (Ẩn trên màn hình mobile) --- */}
+      <Sider 
+        trigger={null} 
+        collapsible 
+        collapsed={collapsed} 
+        theme="dark" 
+        width={240} 
+        collapsedWidth={80}
+        className="shadow-lg hidden md:block"
+      >
         <div className={`h-16 flex items-center px-6 bg-[#002140] transition-all duration-300 ${collapsed ? 'justify-center px-0' : ''}`}>
-          <div className=" flex-shrink-0 h-10 w-10 flex items-center justify-center overflow-hidden mr-2 flex-shrink-0 h-10 w-10 flex items-center justify-center overflow-hidden mr-2 bg-white p-1 rounded-lg shadow-sm">
+          <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center overflow-hidden mr-2 bg-white p-1 rounded-lg shadow-sm cursor-pointer" onClick={() => navigate('/')}>
             <img
               src={"../src/img/logo.png"}
               alt="Hobiwood Logo"
               className="w-full h-auto object-contain"
             />
           </div>
-          {!collapsed && <span className="font-bold text-lg text-ant-primary tracking-wider"> HoBi Wood</span>}
+          {!collapsed && <span className="font-bold text-lg text-white tracking-wider whitespace-nowrap overflow-hidden"> HoBi Wood</span>}
         </div>
         <Menu
           theme="dark"
@@ -75,46 +77,91 @@ const MainLayout: React.FC = () => {
           onClick={({ key }) => navigate(key)}
           className="border-none mt-4"
         />
-
       </Sider>
-      <Layout className="main">
-        <Header className="bg-white p-0 flex items-center justify-between shadow-sm px-6 z-10 h-16 border-b border-ant-border">
-          <Space size="large">
-            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-              className: 'text-lg cursor-pointer hover:text-ant-primary transition-colors',
-              onClick: () => setCollapsed(!collapsed),
-            })}
-            {/* <Input
-              placeholder="Tìm kiếm công việc, báo cáo..."
-              prefix={<SearchOutlined className="text-gray-400" />}
-              className="w-64 md:w-80 rounded-md bg-[#fafafa] border-ant-border"
-              style={{ padding: '6px 12px' }}
-            /> */}
-          </Space>
 
-          <Space size="large">
-            {/* <div className="hidden md:flex items-center gap-2 text-[13px]">
-              <span className="text-[rgba(0,0,0,0.45)]">Phòng ban:</span>
-              <span className="border border-ant-border px-2 py-1 rounded bg-white cursor-pointer hover:border-ant-primary transition-colors">Nhà máy ▾</span>
-            </div> */}
-            <Badge count={3} dot offset={[-2, 2]} color="#fa8c16">
-              <div className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer transition-colors">
+      <Layout className="main flex flex-col min-w-0" style={{ flex: 1 }}>
+        {/* --- COMMON HEADER --- */}
+        <Header className="bg-white p-0 flex items-center justify-between shadow-sm px-4 md:px-6 z-10 h-16 border-b border-gray-200">
+          
+          <div className="flex items-center">
+            {/* Desktop: Nút gập Sider */}
+            <div className="hidden md:flex items-center">
+              {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                className: 'text-xl cursor-pointer hover:text-blue-500 transition-colors mr-4',
+                onClick: () => setCollapsed(!collapsed),
+              })}
+            </div>
+            
+            {/* Mobile: Nút Hamburger + Logo gốc */}
+            <div className="flex md:hidden items-center">
+               <button
+                 className="mr-3 text-xl text-[#1E386B] p-1.5 hover:bg-gray-100 rounded-md transition-colors flex items-center"
+                 onClick={() => setMobileMenuOpen(true)}
+               >
+                 <MenuOutlined />
+               </button>
+               <div className="custom-navbar-brand cursor-pointer flex items-center" onClick={() => navigate('/')}>
+                  <img src={"../src/img/logo.png"} alt="Hobiwood Logo" className="h-8 w-auto object-contain mr-2" />
+                  <div className="leading-tight">
+                    <p className="font-bold text-[#1E386B] text-base m-0 tracking-wide">HOBI WOOD</p>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          <Space size="middle" className="md:size-large">
+            <Badge count={3} dot offset={[-2, 2]} color="#F38320">
+              <div className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-gray-700">
                 <BellOutlined className="text-xl text-[#1677ff]" />
               </div>
             </Badge>
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Space className="cursor-pointer hover:bg-gray-100 p-1 px-2 rounded-lg transition-colors">
-                <Avatar icon={<UserOutlined />} className="bg-ant-primary" />
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+              <Space className="cursor-pointer hover:bg-gray-100 p-1 md:px-2 rounded-lg transition-colors">
+                <Avatar icon={<UserOutlined />} className="bg-[#1E386B]" />
                 <div className="hidden md:block">
-                  <div className="text-sm font-medium leading-none text-[rgba(0,0,0,0.88)]">Anh Tuyển</div>
-
+                  <div className="text-sm font-bold leading-none text-[rgba(0,0,0,0.88)]">Anh Tuyển</div>
                 </div>
               </Space>
             </Dropdown>
           </Space>
         </Header>
 
-        <Content className="p-6 bg-ant-bg overflow-auto" style={{ minHeight: 280 }}>
+        {/* TẦNG 2.5: MOBILE MENU DRAWER (Đồng bộ Dark Theme với Desktop) */}
+        <Drawer
+          title={
+            <div className="flex items-center">
+              <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center overflow-hidden mr-2 bg-white p-1 rounded-md shadow-sm">
+                <img src={"../src/img/logo.png"} alt="Hobiwood Logo" className="w-full h-auto object-contain" />
+              </div>
+              <span className="font-bold text-lg text-white tracking-wider">HoBi Wood</span>
+            </div>
+          }
+          placement="left"
+          onClose={() => setMobileMenuOpen(false)}
+          open={mobileMenuOpen}
+          width={280}
+          styles={{
+            body: { padding: '16px 0', backgroundColor: '#001529' }, 
+            header: { backgroundColor: '#002140', borderBottom: 'none', padding: '16px 24px' } 
+          }}
+          closeIcon={<span className="text-white hover:text-gray-300 transition-colors text-lg">✖</span>}
+        >
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={[location.pathname]}
+            items={menuItems}
+            onClick={({ key }) => {
+              navigate(key);
+              setMobileMenuOpen(false);
+            }}
+            className="border-none"
+            style={{ backgroundColor: 'transparent' }}
+          />
+        </Drawer>
+
+        {/* --- CONTENT AREA --- */}
+        <Content className="p-4 md:p-6 bg-gray-50 overflow-auto flex-1 flex flex-col relative" style={{ minHeight: 280 }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/navigation" element={<NavigationHub />} />

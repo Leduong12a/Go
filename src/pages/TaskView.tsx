@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tree, Typography, Tag, Dropdown, message, Select } from 'antd';
+import { Tree, Typography, Tag, Dropdown, message, Select, Drawer } from 'antd';
 import type { TreeProps } from 'antd';
 import {
   FolderOutlined,
@@ -14,7 +14,7 @@ import {
   WarningOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Star } from 'lucide-react';
+import { Star, Menu as MenuIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 
 const { Text } = Typography;
@@ -266,24 +266,32 @@ const renderStars = (level: number) => (
 );
 
 const InfoRow = ({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) => (
-  <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 last:border-0">
-    <div className="w-5 mt-0.5 text-[#1E386B] flex-shrink-0 text-sm">{icon}</div>
-    <div className="w-44 flex-shrink-0">
-      <Text type="secondary" className="text-xs uppercase tracking-wide">{label}</Text>
+  <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-3 py-2.5 border-b border-gray-100 last:border-0">
+    <div className="flex items-start gap-2 md:gap-3 md:w-44 flex-shrink-0">
+      <div className="w-5 mt-0.5 text-[#1E386B] flex-shrink-0 text-sm flex justify-center">{icon}</div>
+      <div className="flex-1 md:w-auto">
+        <Text type="secondary" className="text-[11px] md:text-xs uppercase tracking-wide">{label}</Text>
+      </div>
     </div>
-    <div className="flex-1 text-sm font-medium">{children}</div>
+    <div className="flex-1 text-sm font-medium ml-7 md:ml-0">{children}</div>
   </div>
 );
 
 const TaskView: React.FC = () => {
   const [selected, setSelected] = useState<any>(null);
   const [selectedWeek, setSelectedWeek] = useState('week_16');
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const onSelect: TreeProps['onSelect'] = (_, info) => {
     const node = info.node as any;
     if (node.isLeaf) {
       const task = ALL_TASKS[node.key];
-      if (task) setSelected({ ...task, key: node.key });
+      if (task) {
+        setSelected({ ...task, key: node.key });
+        if (window.innerWidth < 768) {
+          setDrawerOpen(false); // Mobile: Tự đóng Drawer
+        }
+      }
     } else {
       setSelected(null);
     }
@@ -325,13 +333,13 @@ const TaskView: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-80px)] bg-gray-100">
 
       {/* ── TOP BAR (TÌM KIẾM THEO TUẦN) ── */}
-      <div className="bg-white px-5 py-3 border-b border-gray-200 flex items-center justify-between shadow-sm z-10 flex-shrink-0">
+      <div className="bg-white px-4 md:px-5 py-3 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between shadow-sm z-10 flex-shrink-0 gap-3 md:gap-0">
         <div className="flex items-center gap-2">
-          <CheckSquareOutlined className="text-[#1E386B] text-xl" />
-          <h1 className="m-0 text-[#1E386B] font-bold text-lg">Quản lý Công việc</h1>
+          {/* <CheckSquareOutlined className="text-[#1E386B] text-xl" /> */}
+          {/* <h1 className="m-0 text-[#1E386B] font-bold text-base md:text-lg">Quản lý Công việc</h1> */}
         </div>
-        <div className="flex items-center gap-3">
-          <Text strong className="text-gray-600 text-sm">Chọn tuần:</Text>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Text strong className="text-gray-600 text-sm hidden md:inline">Chọn tuần:</Text>
           <Select
             showSearch
             value={selectedWeek}
@@ -339,20 +347,48 @@ const TaskView: React.FC = () => {
             options={WEEK_OPTIONS}
             placeholder="Chọn tuần"
             size="middle"
-            className="w-64"
+            className="w-full md:w-64"
           />
         </div>
       </div>
 
+      {/* ── MOBILE: NÚT MỞ DRAWER ── */}
+      <div className="md:hidden bg-white px-4 py-2 border-b border-gray-200 shadow-sm flex-shrink-0 z-10">
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="w-full flex items-center justify-center gap-2 bg-blue-50 text-[#1E386B] py-2.5 rounded-lg font-bold text-sm border border-blue-100 hover:bg-blue-100 transition-colors"
+        >
+          Danh sách công việc
+        </button>
+      </div>
+
+      <Drawer
+        title={<span className="font-bold text-[#1E386B]">Danh mục báo cáo</span>}
+        placement="left"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        styles={{ body: { padding: '12px 8px' } }}
+        width={300}
+      >
+        <Tree
+          blockNode
+          defaultExpandAll
+          onSelect={onSelect}
+          treeData={loopTree(buildTree())}
+          selectedKeys={selected ? [selected.key] : []}
+          className="bg-transparent"
+        />
+      </Drawer>
+
       <div className="flex flex-1 overflow-hidden">
-        {/* ── CỘT TRÁI ── */}
-        <div className="w-72 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col shadow-md">
+        {/* ── CỘT TRÁI (Tablet & Desktop) ── */}
+        <div className="hidden md:flex w-56 lg:w-72 flex-shrink-0 bg-white border-r border-gray-200 flex-col shadow-md transition-all">
           <div className="px-4 py-3 bg-[#1E386B]">
             <h2 className="m-0 text-white font-bold text-sm tracking-wide flex items-center gap-2">
               <FolderOutlined /> Danh mục báo cáo
             </h2>
           </div>
-          <div className="flex-1 overflow-auto p-3">
+          <div className="flex-1 overflow-auto p-2 md:p-3">
             <Tree
               blockNode
               defaultExpandAll
@@ -368,9 +404,9 @@ const TaskView: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           {selected ? (
             <>
-              <div className="bg-[#1E386B] px-6 py-4 flex-shrink-0 shadow">
-                <p className="text-white/60 text-xs m-0 mb-0.5 tracking-wide uppercase">Chi tiết công việc</p>
-                <h2 className="text-white font-bold text-lg m-0 leading-snug">{selected.congViec}</h2>
+              <div className="bg-[#1E386B] px-4 md:px-6 py-3 md:py-4 flex-shrink-0 shadow">
+                <p className="text-white/60 text-[10px] md:text-xs m-0 mb-0.5 tracking-wide uppercase">Chi tiết công việc</p>
+                <h2 className="text-white font-bold text-base md:text-lg m-0 leading-snug line-clamp-2 md:line-clamp-none">{selected.congViec}</h2>
               </div>
 
               <div className="flex-1 overflow-auto p-5">
@@ -378,78 +414,177 @@ const TaskView: React.FC = () => {
                   <div className="bg-[#F38320] text-white text-center font-bold py-2 text-xs tracking-widest rounded-t-xl uppercase">
                     Thông tin công việc
                   </div>
-                  <div className="px-5 divide-y divide-gray-100">
+                  {/* --- DESKTOP VIEW --- */}
+                  <div className="hidden md:block px-5 divide-y divide-gray-100">
 
-                    <InfoRow icon={<span className="text-xs font-bold text-gray-500">#</span>} label="STT">
-                      <span className="font-bold text-[#1E386B] text-base">{selected.stt}</span>
-                    </InfoRow>
+                    {/* Nhóm: Thông tin giao việc */}
+                    <div className="py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Thông tin giao việc</p>
+                      <InfoRow icon={<span className="text-xs font-bold text-gray-400">#</span>} label="STT">
+                        <span className="font-semibold text-[#1E386B]">{selected.stt}</span>
+                      </InfoRow>
+                      <InfoRow icon={<CheckSquareOutlined />} label="Công việc">
+                        <span className="font-medium text-gray-800">{selected.congViec}</span>
+                      </InfoRow>
+                      <InfoRow icon={<UserOutlined />} label="Người được giao">
+                        <span className="font-medium text-gray-800">{selected.nguoiGiao}</span>
+                      </InfoRow>
+                      <InfoRow icon={<CalendarOutlined />} label="Ngày giao">
+                        <span className="text-gray-700">{selected.ngayGiao}</span>
+                      </InfoRow>
+                      <InfoRow icon={<ClockCircleOutlined />} label="Y/C xong">
+                        <span className={dayjs(selected.ycXong, 'DD/MM/YYYY').isBefore(dayjs(), 'day') ? 'text-red-500 font-medium' : 'text-gray-700 font-medium'}>
+                          {selected.ycXong}
+                        </span>
+                      </InfoRow>
+                    </div>
 
-                    <InfoRow icon={<CheckSquareOutlined />} label="Công việc">
-                      <span className="font-semibold text-gray-800 text-base">{selected.congViec}</span>
-                    </InfoRow>
+                    {/* Nhóm: Gia hạn */}
+                    <div className="py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Gia hạn</p>
+                      <div className="flex items-center gap-2 flex-wrap py-1">
+                        {selected.giaHan1 && <Tag color="orange">Lần 1 · {selected.giaHan1}</Tag>}
+                        {selected.giaHan2 && <Tag color="red" style={{ opacity: 0.75 }}>Lần 2 · {selected.giaHan2}</Tag>}
+                        {selected.giaHan3 && <Tag color="red" style={{ fontWeight: 600 }}>Lần 3 · {selected.giaHan3}</Tag>}
+                      </div>
+                    </div>
 
-                    <InfoRow icon={<UserOutlined />} label="Người được giao">
-                      <Tag color="blue" className="text-sm px-2 py-0.5">{selected.nguoiGiao}</Tag>
-                    </InfoRow>
+                    {/* Nhóm: Kết quả & tiến độ */}
+                    <div className="py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Kết quả & tiến độ</p>
+                      <InfoRow icon={<CheckSquareOutlined />} label="Kết quả">
+                        <span className="text-gray-700 font-medium">{selected.ketQua}</span>
+                      </InfoRow>
+                      <InfoRow icon={<ThunderboltOutlined />} label="Tiến độ">
+                        <Tag color={(STATUS_CFG[selected.tienDo] ?? { color: 'default' }).color}>
+                          {selected.tienDo}
+                        </Tag>
+                      </InfoRow>
+                      <InfoRow icon={<LinkOutlined />} label="Link KQ">
+                        <a href={selected.linkKQ} target="_blank" rel="noreferrer"
+                          className="text-blue-500 hover:underline flex items-center gap-1 text-sm">
+                          <LinkOutlined /> Mở link
+                        </a>
+                      </InfoRow>
+                      <InfoRow icon={<span className="text-amber-400">★</span>} label="Mức ảnh hưởng">
+                        {renderStars(selected.anhHuong)}
+                      </InfoRow>
+                    </div>
 
-                    <InfoRow icon={<CalendarOutlined />} label="Ngày giao">
-                      {selected.ngayGiao}
-                    </InfoRow>
+                    {/* Nhóm: Vấn đề */}
+                    <div className="py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Vấn đề</p>
+                      <InfoRow icon={<WarningOutlined />} label="Vướng mắc">
+                        <span className="text-gray-700 font-medium">{selected.vuongMac}</span>
+                      </InfoRow>
+                      <InfoRow icon={<ThunderboltOutlined />} label="Cần LĐ tác động">
+                        {selected.canLD === 'Không' ? (
+                          <span className="text-gray-400">Không</span>
+                        ) : (
+                          <Tag color="error">Có</Tag>
+                        )}
+                      </InfoRow>
+                    </div>
 
-                    <InfoRow icon={<ClockCircleOutlined />} label="Y/C xong">
-                      <span className="text-red-600 font-semibold">{selected.ycXong}</span>
-                    </InfoRow>
+                  </div>
 
-                    <InfoRow icon={<ClockCircleOutlined />} label="Gia hạn 1">
-                      <Tag color="orange">{selected.giaHan1}</Tag>
-                    </InfoRow>
+                  {/* --- MOBILE VIEW (COMPACT LIST ITEM) --- */}
+                  <div className="block md:hidden p-3 bg-gray-50 rounded-b-xl border-t border-gray-200 min-h-[300px]">
+                    {(() => {
+                      const borderColorMap: any = {
+                        'Hoàn thành': 'bg-green-500',
+                        'Đang làm': 'bg-blue-500',
+                        'Quá hạn': 'bg-red-500',
+                        'Chưa bắt đầu': 'bg-gray-400',
+                      };
+                      const leftColorClass = borderColorMap[selected.tienDo] || 'bg-gray-400';
 
-                    <InfoRow icon={<ClockCircleOutlined />} label="Gia hạn 2">
-                      <Tag color="volcano">{selected.giaHan2}</Tag>
-                    </InfoRow>
+                      const todayStr = '2026-04-19';
+                      const deadlineMoment = dayjs(selected.ycXong, 'DD/MM/YYYY');
+                      const diffDays = dayjs(todayStr, 'YYYY-MM-DD').diff(deadlineMoment, 'day');
+                      const isOverdueReal = diffDays > 0 && selected.tienDo !== 'Hoàn thành';
 
-                    <InfoRow icon={<ClockCircleOutlined />} label="Gia hạn 3">
-                      <Tag color="red">{selected.giaHan3}</Tag>
-                    </InfoRow>
+                      return (
+                        <div className="relative bg-white border border-gray-200 rounded-lg p-2 shadow-sm mb-2 overflow-hidden flex flex-col transition-all">
+                          <div className={`absolute left-0 top-0 bottom-0 w-[4px] ${leftColorClass}`}></div>
 
-                    <InfoRow icon={<CheckSquareOutlined />} label="Kết quả">
-                      <span className="text-green-700 font-medium">{selected.ketQua}</span>
-                    </InfoRow>
+                          <div className="pl-3">
+                            {/* Dòng 1 (Mới): Trạng thái & Ưu tiên */}
+                            <div className="flex flex-row justify-between items-center mb-2">
+                              <div>
+                                <Tag color={(STATUS_CFG[selected.tienDo] ?? { color: 'default' }).color} className="m-0 text-[11px] font-bold border-none uppercase tracking-tight">
+                                  {selected.tienDo}
+                                </Tag>
+                              </div>
+                              <div className="flex items-center bg-orange-50/50 px-1.5 py-0.5 rounded-full border border-orange-100">
+                                {renderStars(selected.anhHuong)}
+                              </div>
+                            </div>
 
-                    <InfoRow icon={<LinkOutlined />} label="Link KQ">
-                      <a href={selected.linkKQ} target="_blank" rel="noreferrer"
-                        className="text-[#1677ff] hover:underline flex items-center gap-1">
-                        <LinkOutlined /> Mở link
-                      </a>
-                    </InfoRow>
+                            {/* Dòng 2: Deadline & Cảnh báo (Ngang) */}
+                            <div className="bg-gray-100/80 border border-gray-100 rounded flex flex-wrap items-center gap-1.5 py-1.5 px-2 mt-1 -mx-1">
+                              <CalendarOutlined className="text-gray-400 text-[11px]" />
+                              {(() => {
+                                const timelineArr = [];
+                                if (selected.ycXong) timelineArr.push({ type: 'goc', text: selected.ycXong.slice(0,5) });
+                                if (selected.giaHan1) timelineArr.push({ type: 'l1', text: selected.giaHan1.slice(0,5) });
+                                if (selected.giaHan2) timelineArr.push({ type: 'l2', text: selected.giaHan2.slice(0,5) });
+                                if (selected.giaHan3) timelineArr.push({ type: 'l3', text: selected.giaHan3.slice(0,5) });
 
-                    <InfoRow icon={<ThunderboltOutlined />} label="Tiến độ">
-                      <Tag color={(STATUS_CFG[selected.tienDo] ?? { color: 'default' }).color} className="font-semibold px-2 py-0.5">
-                        {selected.tienDo}
-                      </Tag>
-                    </InfoRow>
+                                const finalDateStr = selected.giaHan3 || selected.giaHan2 || selected.giaHan1 || selected.ycXong;
+                                const isTaskOverdue = dayjs('2026-04-19', 'YYYY-MM-DD').isAfter(dayjs(finalDateStr, 'DD/MM/YYYY'), 'day') && selected.tienDo !== 'Hoàn thành';
 
-                    <InfoRow icon={<WarningOutlined />} label="Vướng mắc">
-                      <span className="text-red-600 font-medium">{selected.vuongMac}</span>
-                    </InfoRow>
+                                return timelineArr.map((item, idx) => {
+                                  const isLast = idx === timelineArr.length - 1;
+                                  let textClass = 'text-gray-600';
+                                  if (item.type === 'l1' || item.type === 'l2') textClass = 'text-orange-500 font-medium';
+                                  if (item.type === 'l3') textClass = 'text-red-600 font-bold';
+                                  
+                                  // Nếu là mốc cuối cùng và bị quá hạn -> Bôi đỏ toàn bộ
+                                  if (isLast && isTaskOverdue) textClass = 'text-red-600 font-bold';
 
-                    <InfoRow icon={<ThunderboltOutlined />} label="Cần LĐ tác động">
-                      <Tag color={selected.canLD === 'Có' ? 'error' : 'default'} className="px-2">{selected.canLD}</Tag>
-                    </InfoRow>
+                                  return (
+                                    <React.Fragment key={idx}>
+                                      {idx > 0 && <span className="text-gray-300 text-[10px]">&rarr;</span>}
+                                      <span className={`text-[12px] tracking-tight ${textClass}`}>
+                                        {item.text}
+                                      </span>
+                                      {isLast && isTaskOverdue && <span className="text-[11px] ml-0.5 leading-none" title="Quá hạn">⚠️</span>}
+                                    </React.Fragment>
+                                  );
+                                });
+                              })()}
+                            </div>
+                          </div>
 
-                    <InfoRow icon={<span className="text-[#F38320]">★</span>} label="Mức ảnh hưởng">
-                      {renderStars(selected.anhHuong)}
-                    </InfoRow>
-
+                          {/* Bổ sung kết quả siêu ngắn gọn để App vẫn có đất dụng võ */}
+                          {(selected.ketQua || selected.vuongMac) && (
+                            <div className="mt-2 pl-3 pt-2 border-t border-dashed border-gray-200 space-y-1">
+                              {selected.ketQua && (
+                                <div className="text-[12px] text-gray-700 leading-tight">
+                                  <span className="font-bold text-gray-500">Kết Quả: </span>{selected.ketQua}
+                                </div>
+                              )}
+                              {selected.vuongMac && (
+                                <div className="text-[12px] text-red-600 leading-tight">
+                                  <span className="font-bold text-red-400">Vướng Mắc: </span>{selected.vuongMac}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-              <CheckSquareOutlined className="text-6xl text-gray-200" />
-              <Text type="secondary" className="text-base">
-                Chọn một công việc từ cây bên trái để xem chi tiết
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-2 md:gap-3 p-6 text-center">
+              <CheckSquareOutlined className="text-4xl md:text-6xl text-gray-200" />
+              <Text type="secondary" className="text-sm md:text-base max-w-sm">
+                <span className="md:hidden">Bấm nút "Danh sách công việc" bên trên để chọn hiển thị chi tiết nhé!</span>
+                <span className="hidden md:inline">Chọn một công việc từ cây bên trái để xem chi tiết nhé!</span>
               </Text>
             </div>
           )}
